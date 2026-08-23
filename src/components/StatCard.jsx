@@ -1,12 +1,13 @@
-export default function StatCard({ label, value, icon: Icon, color }) {
+// StatCard - emoji icon ke saath, gradient background
+export default function StatCard({ label, value, emoji, gradient }) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4">
-      <div className={`w-11 h-11 rounded-lg flex items-center justify-center ${color}`}>
-        <Icon size={20} className="text-white" />
+    <div className={`rounded-xl p-4 flex items-center gap-4 ${gradient}`}>
+      <div className="w-11 h-11 rounded-lg bg-white/30 flex items-center justify-center text-2xl">
+        {emoji}
       </div>
       <div>
-        <p className="text-2xl font-semibold text-slate-800">{value}</p>
-        <p className="text-sm text-slate-500">{label}</p>
+        <p className="text-2xl font-semibold text-white">{value}</p>
+        <p className="text-sm text-white/90">{label}</p>
       </div>
     </div>
   );

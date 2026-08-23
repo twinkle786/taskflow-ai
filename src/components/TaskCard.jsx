@@ -1,26 +1,24 @@
+// TaskCard - dark theme, emoji status badges
 const statusStyles = {
-  todo: "bg-slate-100 text-slate-600",
-  "in-progress": "bg-amber-50 text-amber-600",
-  done: "bg-emerald-50 text-emerald-600",
+  todo: { emoji: "📋", style: "bg-slate-800 text-slate-400" },
+  "in-progress": { emoji: "⏳", style: "bg-amber-500/20 text-amber-400" },
+  done: { emoji: "✅", style: "bg-emerald-500/20 text-emerald-400" },
 };
 
-const priorityStyles = {
-  low: "text-slate-400",
-  medium: "text-amber-500",
-  high: "text-red-500",
-};
+const priorityEmoji = { low: "🔵", medium: "🟡", high: "🔴" };
 
 export default function TaskCard({ task }) {
+  const s = statusStyles[task.status];
   return (
-    <div className="flex items-center justify-between bg-white border border-slate-200 rounded-lg p-3 hover:border-indigo-300 transition">
+    <div className="flex items-center justify-between bg-slate-900 border border-slate-800 rounded-lg p-3 hover:border-purple-500/50 transition">
       <div className="flex-1">
-        <p className="text-sm font-medium text-slate-800">{task.title}</p>
-        <p className="text-xs text-slate-400 mt-1">
-          Due: {task.dueDate} • <span className={priorityStyles[task.priority]}>{task.priority} priority</span>
+        <p className="text-sm font-medium text-slate-200">{task.title}</p>
+        <p className="text-xs text-slate-500 mt-1">
+          📅 Due: {task.dueDate} • {priorityEmoji[task.priority]} {task.priority} priority
         </p>
       </div>
-      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusStyles[task.status]}`}>
-        {task.status}
+      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${s.style}`}>
+        {s.emoji} {task.status}
       </span>
     </div>
   );
