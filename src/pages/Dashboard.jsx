@@ -1,37 +1,62 @@
 import { useState, useEffect } from "react";
+import { Plus } from "lucide-react";
 import Navbar from "../components/Navbar";
 import StatCard from "../components/StatCard";
 import ProjectCard from "../components/ProjectCard";
 import TaskCard from "../components/TaskCard";
-
-const dummyProjects = [
-  { id: 1, title: "TaskFlow AI", description: "AI-powered project management platform", status: "active", completedTasks: 6, totalTasks: 10 },
-  { id: 2, title: "ClinikX Update", description: "Clinic management system v2 improvements", status: "active", completedTasks: 3, totalTasks: 8 },
-  { id: 3, title: "Portfolio Site", description: "Personal portfolio revamp with new projects", status: "planning", completedTasks: 1, totalTasks: 5 },
-];
-
-const dummyTasks = [
-  { id: 1, title: "Design dashboard wireframe", status: "done", priority: "high", dueDate: "20 Aug" },
-  { id: 2, title: "Setup Express backend routes", status: "in-progress", priority: "high", dueDate: "24 Aug" },
-  { id: 3, title: "Integrate MongoDB models", status: "in-progress", priority: "medium", dueDate: "26 Aug" },
-  { id: 4, title: "Add AI task suggestion feature", status: "todo", priority: "high", dueDate: "30 Aug" },
-  { id: 5, title: "Write README documentation", status: "todo", priority: "low", dueDate: "1 Sep" },
-];
+import AddProjectModal from "../components/AddProjectModal";
+import AddTaskModal from "../components/AddTaskModal";
+import api from "../api/axios";
 
 export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [showTaskModal, setShowTaskModal] = useState(false);
 
+  // Component load hote hi real data fetch karo backend se
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setProjects(dummyProjects);
-      setTasks(dummyTasks);
-      setLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
+    fetchData();
   }, []);
+
+  async function fetchData() {
+    setLoading(true);
+    try {
+      const [projectsRes, tasksRes] = await Promise.all([
+        api.get("/projects"),
+        api.get("/tasks"),
+      ]);
+      setProjects(projectsRes.data.data);
+      setTasks(tasksRes.data.data);
+    } catch (error) {
+      console.error("Data fetch karne mein error:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Naya project bann jaane pe list mein add kar do (bina poora refetch kiye)
+  function handleProjectCreated(newProject) {
+    setProjects((prev) => [...prev, newProject]);
+  }
+
+  function handleTaskCreated(newTask) {
+    setTasks((prev) => [...prev, newTask]);
+  }
+
+  function handleTaskUpdated(updatedTask) {
+    setTasks((prev) => prev.map((t) => (t._id === updatedTask._id ? updatedTask : t)));
+  }
+
+  function handleTaskDeleted(taskId) {
+    setTasks((prev) => prev.filter((t) => t._id !== taskId));
+  }
+
+  function handleProjectDeleted(projectId) {
+    setProjects((prev) => prev.filter((p) => p._id !== projectId));
+  }
 
   const filteredProjects = projects.filter((p) =>
     p.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -65,30 +90,56 @@ export default function Dashboard() {
             </div>
 
             <div className="mb-8">
-              <h2 className="text-base font-semibold text-slate-100 mb-3">🚀 Your Projects</h2>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-base font-semibold text-slate-100">🚀 Your Projects</h2>
+                <button
+                  onClick={() => setShowProjectModal(true)}
+                  className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-pink-500 text-white font-medium hover:opacity-90 transition"
+                >
+                  <Plus size={14} /> New Project
+                </button>
+              </div>
               {filteredProjects.length === 0 ? (
                 <div className="bg-slate-900 border border-dashed border-slate-700 rounded-xl p-8 text-center text-slate-500 text-sm">
-                  😕 Koi project nahi mila. Search term change karke try karo.
+                  ✨ Yahan se shuru karo — pehla project banao!
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredProjects.map((p) => (
-                    <ProjectCard key={p.id} project={p} />
-                  ))}
+                  {filteredProjects.map((p) => {
+                    const projectTasks = tasks.filter((t) => t.projectId?._id === p._id || t.projectId === p._id);
+                    const doneCount = projectTasks.filter((t) => t.status === "done").length;
+                    return (
+                      <ProjectCard
+                        key={p._id}
+                        project={p}
+                        taskCount={projectTasks.length}
+                        doneCount={doneCount}
+                        onDeleted={handleProjectDeleted}
+                      />
+                    );
+                  })}
                 </div>
               )}
             </div>
 
             <div>
-              <h2 className="text-base font-semibold text-slate-100 mb-3">📝 Recent Tasks</h2>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-base font-semibold text-slate-100">📝 Recent Tasks</h2>
+                <button
+                  onClick={() => setShowTaskModal(true)}
+                  className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-pink-500 text-white font-medium hover:opacity-90 transition"
+                >
+                  <Plus size={14} /> New Task
+                </button>
+              </div>
               {filteredTasks.length === 0 ? (
                 <div className="bg-slate-900 border border-dashed border-slate-700 rounded-xl p-8 text-center text-slate-500 text-sm">
-                  😕 Koi task nahi mila.
+                  ✨ Pehla task add karke shuru karo!
                 </div>
               ) : (
                 <div className="space-y-2">
                   {filteredTasks.map((t) => (
-                    <TaskCard key={t.id} task={t} />
+                    <TaskCard key={t._id} task={t} onUpdated={handleTaskUpdated} onDeleted={handleTaskDeleted} />
                   ))}
                 </div>
               )}
@@ -96,6 +147,13 @@ export default function Dashboard() {
           </>
         )}
       </main>
+
+      {showProjectModal && (
+        <AddProjectModal onClose={() => setShowProjectModal(false)} onCreated={handleProjectCreated} />
+      )}
+      {showTaskModal && (
+        <AddTaskModal projects={projects} onClose={() => setShowTaskModal(false)} onCreated={handleTaskCreated} />
+      )}
     </div>
   );
 }

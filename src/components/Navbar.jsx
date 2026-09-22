@@ -1,6 +1,5 @@
 import { Search, Bell, Menu } from "lucide-react";
 
-// Navbar - dark theme, gradient logo aur avatar image ke saath
 export default function Navbar({ onMenuClick, searchTerm, setSearchTerm }) {
   return (
     <header className="flex items-center justify-between bg-slate-900 border-b border-slate-800 px-4 md:px-6 py-3">
