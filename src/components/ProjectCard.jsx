@@ -1,7 +1,9 @@
-import { Trash2 } from "lucide-react";
+import { Trash2, Sparkles } from "lucide-react";
 import api from "../api/axios";
 
-export default function ProjectCard({ project, taskCount, doneCount, onDeleted }) {
+export default function ProjectCard({ project, taskCount, doneCount, onDeleted, onAiSuggest }) {
+  if (!project) return null;
+
   const progress = Math.round((doneCount / taskCount) * 100) || 0;
   const statusEmoji = { active: "🚀", planning: "📝", done: "🎉" };
 
@@ -17,12 +19,24 @@ export default function ProjectCard({ project, taskCount, doneCount, onDeleted }
         alt={project.title}
         className="w-full h-24 object-cover"
       />
-      <button
-        onClick={handleDelete}
-        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-slate-900/80 text-slate-400 hover:text-red-400 transition p-1.5 rounded-lg"
-      >
-        <Trash2 size={14} />
-      </button>
+      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition">
+        <button
+          onClick={() => {
+            console.log("Sparkle clicked!", project);
+            onAiSuggest(project);
+          }}
+          className="bg-slate-900/80 text-purple-300 hover:text-purple-200 p-1.5 rounded-lg"
+          title="AI Suggest Tasks"
+        >
+          <Sparkles size={14} />
+        </button>
+        <button
+          onClick={handleDelete}
+          className="bg-slate-900/80 text-slate-400 hover:text-red-400 p-1.5 rounded-lg"
+        >
+          <Trash2 size={14} />
+        </button>
+      </div>
       <div className="p-4">
         <div className="flex items-start justify-between mb-2">
           <h3 className="font-medium text-slate-100">{project.title}</h3>

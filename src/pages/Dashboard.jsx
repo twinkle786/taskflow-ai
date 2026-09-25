@@ -6,6 +6,7 @@ import ProjectCard from "../components/ProjectCard";
 import TaskCard from "../components/TaskCard";
 import AddProjectModal from "../components/AddProjectModal";
 import AddTaskModal from "../components/AddTaskModal";
+import AISuggestModal from "../components/AISuggestModal";
 import api from "../api/axios";
 
 export default function Dashboard() {
@@ -15,8 +16,8 @@ export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
+  const [aiProject, setAiProject] = useState(null); // konse project ke liye AI modal khula hai
 
-  // Component load hote hi real data fetch karo backend se
   useEffect(() => {
     fetchData();
   }, []);
@@ -37,13 +38,16 @@ export default function Dashboard() {
     }
   }
 
-  // Naya project bann jaane pe list mein add kar do (bina poora refetch kiye)
   function handleProjectCreated(newProject) {
     setProjects((prev) => [...prev, newProject]);
   }
 
   function handleTaskCreated(newTask) {
     setTasks((prev) => [...prev, newTask]);
+  }
+
+  function handleMultipleTasksAdded(newTasks) {
+    setTasks((prev) => [...prev, ...newTasks]);
   }
 
   function handleTaskUpdated(updatedTask) {
@@ -74,7 +78,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <Navbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <Navbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} tasks={tasks} />
 
       <main className="max-w-6xl mx-auto px-4 md:px-6 py-6">
         {loading ? (
@@ -115,6 +119,7 @@ export default function Dashboard() {
                         taskCount={projectTasks.length}
                         doneCount={doneCount}
                         onDeleted={handleProjectDeleted}
+                        onAiSuggest={setAiProject}
                       />
                     );
                   })}
@@ -153,6 +158,13 @@ export default function Dashboard() {
       )}
       {showTaskModal && (
         <AddTaskModal projects={projects} onClose={() => setShowTaskModal(false)} onCreated={handleTaskCreated} />
+      )}
+      {aiProject && (
+        <AISuggestModal
+          project={aiProject}
+          onClose={() => setAiProject(null)}
+          onTasksAdded={handleMultipleTasksAdded}
+        />
       )}
     </div>
   );
