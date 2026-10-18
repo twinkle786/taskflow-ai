@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../context/authcontext";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -18,7 +18,7 @@ export default function Login() {
       await login(email, password);
       navigate("/dashboard"); // login successful hone pe dashboard pe bhej do
     } catch (err) {
-      setError(err.response?.data?.error || "Login fail ho gaya");
+      setError(err.response?.data?.error || "Email ya password ek baar phir check kar lo");
     } finally {
       setLoading(false);
     }
